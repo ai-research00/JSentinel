@@ -1,4 +1,5 @@
 #!/bin/env bash
+echo "simpleserver.py script started"
 
 PYTHON_VERSION=$(python -c 'import sys; print("%i" % (sys.hexversion<0x03000000))')
 
@@ -8,7 +9,7 @@ else
     PORT=$1
 fi
 
-cd repository
+# cd repository # Removed this line, server should serve from project root
 
 if [ ${PYTHON_VERSION} -eq 0 ]; then
     python -m http.server $PORT
