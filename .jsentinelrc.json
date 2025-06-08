@@ -1,0 +1,37 @@
+{
+  "scanOptions": {
+    "patterns": true,
+    "dependencies": true,
+    "devDependencies": false,
+    "ignoreFiles": [
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      ".git/**"
+    ],
+    "minSeverity": "low",
+    "parallel": true,
+    "maxWorkers": 4
+  },
+  "rules": {
+    "customPatternsPath": "./custom-patterns",
+    "customRulesPath": "./custom-rules",
+    "disabledRules": []
+  },
+  "cache": {
+    "enabled": true,
+    "dir": ".jsentinel/cache",
+    "ttl": 86400
+  },
+  "reporting": {
+    "format": "sarif",
+    "outputFile": "./security-report.sarif",
+    "quiet": false,
+    "verbose": false
+  },
+  "ci": {
+    "failOnIssues": true,
+    "maxIssues": 0,
+    "githubActions": true
+  }
+}
