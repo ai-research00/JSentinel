@@ -1,0 +1,22 @@
+{
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "@types/node-fetch": "^2.6.4",
+    "@typescript-eslint/parser": "^8.33.1",
+    "@typescript-eslint/types": "^8.33.1",
+    "@typescript-eslint/typescript-estree": "^8.33.1",
+    "cosmiconfig": "^9.0.0",
+    "typescript": "^5.0.0",
+    "@types/acorn": "^4.0.6"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^4.22.0",
+    "acorn": "^8.14.1",
+    "acorn-walk": "^8.3.4",
+    "axios": "^1.9.0",
+    "cache-manager": "^6.4.3",
+    "chokidar": "^4.0.3",
+    "worker-threads-pool": "^2.0.0",
+    "node-fetch": "^2.6.7"
+  }
+}

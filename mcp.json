@@ -1,0 +1,65 @@
+//author: Muzan Sano
+//version: 1.0.0
+//Task: Make this project RetireJS competitor 
+//advance and make it better
+{
+  "name": "jsentinel",
+  "version": "1.0.0",
+  "description": "A comprehensive security vulnerability scanner for JavaScript projects",
+  "main": "dist/scanner.js",
+  "types": "dist/scanner.d.ts",
+  "bin": {
+    "jsentinel": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "dev": "ts-node src/cli.ts",
+    "lint": "eslint src/",
+    "prepare": "npm run build",
+    "watch": "tsc -w"
+  },
+  "keywords": [
+    "security",
+    "javascript",
+    "vulnerability",
+    "analysis",
+    "scanner",
+    "audit",
+    "dependencies",
+    "typescript",
+    "ast",
+    "static-analysis"
+  ],
+  "author": "Muzan Sano",
+  "license": "MIT",
+  "dependencies": {
+    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/typescript-estree": "^6.0.0",
+    "axios": "^1.4.0",
+    "chalk": "^4.1.2",
+    "commander": "^11.0.0",
+    "semver": "^7.5.3",
+    "typescript": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.19",
+    "@types/semver": "^7.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "eslint": "^8.44.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^3.0.0",
+    "ts-node": "^10.9.1"
+  }
+}
+// This JSON file defines the metadata and dependencies for the MCP project.
+// It includes the project name, version, description, main entry point, scripts for testing and starting the application,
+// keywords for searchability, author information, license type, and the dependencies required for the project to run.
+// The project aims to analyze JavaScript projects for security vulnerabilities, making it a competitor to RetireJS.
+// The dependencies include 'axios' for making HTTP requests and 'chalk' for styling console output.
+// The devDependencies include 'jest' for testing purposes.
+// This file is essential for package management and helps in setting up the project environment.
+// The project can be started using the command `npm start`, and tests can be run using `npm test`.
+// The project is designed to be a tool for developers to ensure the security of their JavaScript codebases, and it aims to provide comprehensive analysis and reporting features.
+
+
