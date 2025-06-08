@@ -1,88 +1,50 @@
 # JSentinel
 
-#### What you require you must also retire
+## Research-driven JavaScript Security Analysis
 
-There is a plethora of JavaScript libraries for use on the Web and in Node.JS apps out there. This greatly simplifies development,but we need to stay up-to-date on security fixes. "Using Components with Known Vulnerabilities" is now a part of the [OWASP Top 10](https://www.owasp.org/index.php/Top_10_2013-A9-Using_Components_with_Known_Vulnerabilities) list of security risks and insecure libraries can pose a huge risk to your Web app. The goal of Retire.js is to help you detect the use of JS-library versions with known vulnerabilities.
+JSentinel is a research-focused tool for automated detection of vulnerable JavaScript libraries in web and Node.js projects.
 
-Retire.js can be used in many ways:
+### Research Context
 
-1. [As command line scanner](https://github.com/RetireJS/retire.js/tree/master/node)
-2. [As a grunt plugin](https://github.com/bekk/grunt-retire)
-3. [As a gulp task](#user-content-gulp-task)
-4. [As a Chrome extension](https://github.com/RetireJS/retire.js/tree/master/chrome) - **Not** officially available in the Chrome web store
-5. [As a Firefox extension](https://github.com/RetireJS/retire.js/tree/master/firefox) - **Deprecated** Let us know if you want to maintain and undeprecate it.
-6. [As a Burp Extension](https://github.com/h3xstream/burp-retire-js) or [OWASP ZAP Add-on](https://www.zaproxy.org/docs/desktop/addons/retire.js/)
+This project is part of ongoing research into automated software composition analysis (SCA) and the security of third-party JavaScript dependencies. Our goal is to advance the state of the art in detecting, reporting, and remediating vulnerable components in modern software stacks.
 
-## Command line scanner
+### Key Features
 
-Scan a web app or node app for use of vulnerable JavaScript libraries and/or Node.JS modules. If you haven't already, you need to [install node/npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) first. In the source code folder of the application folder run:
+- Scans for known vulnerable JavaScript libraries in projects
+- Supports command line, Grunt, Gulp, and browser extension integrations
+- CycloneDX SBOM generation for compliance and research reproducibility
+- Extensible detection rules for new vulnerabilities
 
-```
-$ npm install -g retire
-$ retire
-```
+### Usage
 
-## SBOM generation
-
-retire.js can generate SBOMs in the CycloneDX-format:
-
-```
-$ retire --outputformat cyclonedx
+```bash
+npm install -g retire
+retire
 ```
 
-By default retire.js will exit with code 13 if it finds vulnerabilities. This can be overridden with `--exitwith 0`.
-
-## Grunt plugin
-
-A [Grunt task for running Retire.js](https://github.com/bekk/grunt-retire) as part of your application's build routine, or some other automated workflow.
-
-## Gulp task
-
-An example of a Gulp task which can be used in your gulpfile to watch and scan your project files automatically. You can modify the watch patterns and (optional) Retire.js options as you like.
-
-```javascript
-const c = require("ansi-colors");
-
-var gulp = require("gulp");
-var beeper = require("beeper");
-var log = require("fancy-log");
-var spawn = require("child_process").spawn;
-
-gulp.task("retire:watch", ["retire"], function (done) {
-  // Watch all javascript files and package.json
-  gulp.watch(["js/**/*.js", "package.json"], ["retire"]);
-});
-
-gulp.task("retire", function () {
-  // Spawn Retire.js as a child process
-  // You can optionally add option parameters to the second argument (array)
-  var child = spawn("retire", [], { cwd: process.cwd() });
-
-  child.stdout.setEncoding("utf8");
-  child.stdout.on("data", function (data) {
-    log(data);
-  });
-
-  child.stderr.setEncoding("utf8");
-  child.stderr.on("data", function (data) {
-    log(c.red(data));
-    beeper();
-  });
-});
+To generate a CycloneDX SBOM:
+```bash
+retire --outputformat cyclonedx
 ```
 
-## Chrome and firefox extensions
+### Documentation
 
-Scans visited sites for references to insecure libraries, and puts warnings in the developer console. An icon on the address bar displays will also indicate if vulnerable libraries were loaded.
+- [Introduction & Research](docs/introduction.md)
+- [Installation](docs/installation.md)
+- [Usage](docs/usage.md)
+- [Architecture](docs/architecture.md)
+- [Results & Evaluation](docs/results.md)
+- [API Reference](docs/api.md)
+- [How to Cite](docs/cite.md)
 
-## Burp Extension and OWASP ZAP Add-on
+### Contribution
 
-[@h3xstream](https://github.com/h3xstream) has adapted Retire.js as a [plugin](https://github.com/h3xstream/burp-retire-js) for the penetration testing tools [Burp](https://portswigger.net/burp/) and [OWASP ZAP](https://www.zaproxy.org).
+Contributions are welcome! See [CONTRIBUTING.md](docs/contributing.md).
 
-The [OWASP ZAP](https://www.zaproxy.org) team officially supports a Retire.js add-on which is available via the ZAP Marketplace and is included by default in the ZAP weekly releases: https://www.zaproxy.org/docs/desktop/addons/retire.js/
+### License
 
-## Donate
+MIT License (see LICENSE)
 
-<a href="https://www.paypal.me/..."><img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif"></a>
+### How to Cite
 
-Donations will be used to fund the maintainance of the tool and vulnerability repo.
+If you use JSentinel in academic work, please see [docs/cite.md](docs/cite.md) for citation information.
