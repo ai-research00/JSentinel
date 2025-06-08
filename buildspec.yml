@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - npm ci
+  
+  pre_build:
+    commands:
+      - echo "Starting JSentinel security scan..."
+  
+  build:
+    commands:
+      - npx jsentinel scan --ci --format sarif --output-file security-report.sarif
+  
+  post_build:
+    commands:
+      - echo "Security scan completed"
+
+reports:
+  JSentinel-Reports:
+    files:
+      - security-report.sarif
+    file-format: SARIF
+    
+artifacts:
+  files:
+    - security-report.sarif
+  name: security-reports
