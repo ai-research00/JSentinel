@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "@typescript-eslint/parser": "^8.33.1",
+    "@typescript-eslint/types": "^8.33.1",
+    "@typescript-eslint/typescript-estree": "^8.33.1"
+  },
+  "dependencies": {
+    "chokidar": "^4.0.3"
+  }
+}

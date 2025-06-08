@@ -1,0 +1,44 @@
+{
+  "patterns": [
+    {
+      "pattern": "eval(${any})",
+      "language": ["javascript", "typescript"],
+      "description": "Use of eval() can be dangerous as it executes arbitrary JavaScript code",
+      "severity": "high",
+      "cwe": ["CWE-95"],
+      "fix": "Consider using safer alternatives like JSON.parse() for JSON data or Function constructor for dynamic function creation"
+    },
+    {
+      "pattern": "innerHTML = ${any}",
+      "language": ["javascript", "typescript"],
+      "description": "Direct assignment to innerHTML can lead to XSS vulnerabilities",
+      "severity": "high",
+      "cwe": ["CWE-79"],
+      "fix": "Use textContent for text or createElement/appendChild for DOM manipulation"
+    },
+    {
+      "pattern": "require(${any})",
+      "language": ["javascript", "typescript"],
+      "description": "Dynamic requires can lead to code execution vulnerabilities",
+      "severity": "medium",
+      "cwe": ["CWE-470"],
+      "fix": "Use static require statements or import syntax"
+    },
+    {
+      "pattern": "child_process.exec(${any})",
+      "language": ["javascript", "typescript"],
+      "description": "Potential command injection vulnerability in child_process.exec",
+      "severity": "critical",
+      "cwe": ["CWE-78"],
+      "fix": "Use child_process.execFile or validate and sanitize input"
+    },
+    {
+      "pattern": "new Function(${any})",
+      "language": ["javascript", "typescript"],
+      "description": "Creating functions from strings can lead to code injection",
+      "severity": "high",
+      "cwe": ["CWE-95"],
+      "fix": "Avoid dynamic function creation, use regular functions instead"
+    }
+  ]
+}
