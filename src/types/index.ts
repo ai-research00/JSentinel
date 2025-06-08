@@ -158,6 +158,14 @@ export interface ScanOptions {
     enableASTAnalysis?: boolean;
     enableDataFlow?: boolean;
     customPatterns?: CodePattern[];
+    
+    // Cache options
+    cacheTTL?: number;  // Time to live in milliseconds
+    cacheDir?: string;  // Directory to store cache files
+    
+    // Parallel scanning options
+    maxWorkers?: number;  // Maximum number of worker threads to use
+    chunkSize?: number;   // Number of files to process per worker
 }
 
 export interface ASTParsedFile {

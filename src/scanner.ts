@@ -1,9 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import axios from 'axios';
-import * as parser from '@typescript-eslint/parser';
-import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/types';
-import { traverse } from '@typescript-eslint/typescript-estree';
 import { 
     ScanOptions, 
     DatabaseEntry, 
@@ -14,7 +8,15 @@ import {
     SeverityLevel,
     Vulnerability
 } from './types';
+import { ParallelScanner } from './parallel/scanner';
 import { createReporter, Reporter } from './reporters';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
+import axios from 'axios';
+import * as parser from '@typescript-eslint/parser';
+import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/types';
+import { traverse } from '@typescript-eslint/typescript-estree';
 
 export class Scanner {
     private vulnerabilityDB: Map<string, any>;
@@ -23,6 +25,8 @@ export class Scanner {
     private watchedFiles: Set<string>;
     private dataFlowGraph: Map<string, DataFlow>;
     private reporter: Reporter;
+    private vulnCache: VulnerabilityCache;
+    private parallelScanner: ParallelScanner;
 
     constructor(options: ScanOptions = {}) {
         this.vulnerabilityDB = new Map();
@@ -40,20 +44,41 @@ export class Scanner {
             timeout: options.timeout ?? 30000,
             enableASTAnalysis: options.enableASTAnalysis ?? true,
             enableDataFlow: options.enableDataFlow ?? true,
-            customPatterns: options.customPatterns ?? []
+            customPatterns: options.customPatterns ?? [],
+            cacheTTL: options.cacheTTL ?? 24 * 60 * 60 * 1000, // 24 hours
+            cacheDir: options.cacheDir ?? path.join(process.cwd(), '.cache'),
+            maxWorkers: options.maxWorkers ?? os.cpus().length,
+            chunkSize: options.chunkSize ?? 100
         };
         this.reporter = createReporter(options.outputFormat || 'text');
+        this.vulnCache = new VulnerabilityCache({
+            ttl: options.cacheTTL,
+            cacheDir: options.cacheDir
+        });
+        this.parallelScanner = new ParallelScanner(options);
     }
 
-    async loadVulnerabilityDB(dbPath: string): Promise<boolean> {
+    public async loadVulnerabilityDB(dbPath: string): Promise<boolean> {
         try {
+            // Try to get from cache first
+            const cached = await this.vulnCache.getVulnerabilities(dbPath);
+            if (cached) {
+                Object.entries(cached).forEach(([library, info]) => {
+                    this.vulnerabilityDB.set(library, info);
+                });
+                return true;
+            }
+
+            // If not in cache, load from file
             const rawData = await fs.promises.readFile(dbPath, 'utf8');
             const data = JSON.parse(rawData) as DatabaseEntry;
             
+            // Update both memory and cache
             Object.entries(data).forEach(([library, info]) => {
                 this.vulnerabilityDB.set(library, info);
             });
             
+            await this.vulnCache.setVulnerabilities(dbPath, data);
             return true;
         } catch (error) {
             console.error('Error loading vulnerability database:', error);
@@ -709,6 +734,55 @@ export class Scanner {
         return this.filterBySeverity(vulnerabilities);
     }
 
+    public async scanProjectInParallel(
+        projectPath: string,
+        onProgress?: (progress: number) => void
+    ): Promise<ScanResult[]> {
+        const allFiles: string[] = [];
+        const vulnerabilities: ScanResult[] = [];
+
+        // First scan package.json
+        const packageJsonPath = path.join(projectPath, 'package.json');
+        if (fs.existsSync(packageJsonPath)) {
+            const packageVulns = await this.scanPackageJson(packageJsonPath);
+            vulnerabilities.push(...packageVulns);
+        }
+
+        // Collect all JavaScript/TypeScript files
+        await this.collectSourceFiles(projectPath, allFiles);
+
+        // Scan files in parallel
+        if (allFiles.length > 0) {
+            const results = await this.parallelScanner.scanInParallel(
+                allFiles,
+                onProgress
+            );
+            vulnerabilities.push(...results);
+        }
+
+        return this.filterBySeverity(vulnerabilities);
+    }
+
+    private async collectSourceFiles(dirPath: string, files: string[]): Promise<void> {
+        try {
+            const entries = await fs.promises.readdir(dirPath, { withFileTypes: true });
+            
+            for (const entry of entries) {
+                const fullPath = path.join(dirPath, entry.name);
+                
+                if (entry.isDirectory()) {
+                    if (this.shouldScanDirectory(entry.name)) {
+                        await this.collectSourceFiles(fullPath, files);
+                    }
+                } else if (this.isJavaScriptSourceFile(entry.name)) {
+                    files.push(fullPath);
+                }
+            }
+        } catch (error) {
+            console.error('Error collecting source files:', error);
+        }
+    }
+
     public async addCustomPattern(pattern: CodePattern): Promise<void> {
         this.codePatterns.push(pattern);
     }
@@ -731,13 +805,38 @@ export class Scanner {
 
     public async updateVulnerabilityDB(url: string): Promise<boolean> {
         try {
-            const response = await axios.get(url);
-            if (response.data) {
-                Object.entries(response.data).forEach(([library, info]) => {
+            // Check if we have a cached version
+            const cached = await this.vulnCache.getVulnerabilities(url);
+            const headers: Record<string, string> = {};
+            
+            const cachedEntry = await this.vulnCache.get<DatabaseEntry>(url);
+            if (cachedEntry?.etag) {
+                headers['If-None-Match'] = cachedEntry.etag;
+            }
+
+            const response = await axios.get(url, { headers });
+            
+            if (response.status === 304) {
+                // Not modified, use cache
+                if (cached) {
+                    Object.entries(cached).forEach(([library, info]) => {
+                        this.vulnerabilityDB.set(library, info);
+                    });
+                    return true;
+                }
+            } else if (response.data) {
+                // Update both memory and cache
+                const etag = response.headers.etag;
+                const data = response.data as DatabaseEntry;
+                
+                Object.entries(data).forEach(([library, info]) => {
                     this.vulnerabilityDB.set(library, info);
                 });
+                
+                await this.vulnCache.setVulnerabilities(url, data, etag);
                 return true;
             }
+            
             return false;
         } catch (error) {
             console.error('Error updating vulnerability database:', error);
