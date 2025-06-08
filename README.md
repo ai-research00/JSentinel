@@ -1,4 +1,4 @@
-# Retire.js
+# JSentinel
 
 #### What you require you must also retire
 
@@ -83,6 +83,6 @@ The [OWASP ZAP](https://www.zaproxy.org) team officially supports a Retire.js ad
 
 ## Donate
 
-<a href="https://www.paypal.me/eoftedal"><img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif"></a>
+<a href="https://www.paypal.me/..."><img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif"></a>
 
 Donations will be used to fund the maintainance of the tool and vulnerability repo.
